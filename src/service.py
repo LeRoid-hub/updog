@@ -1,8 +1,9 @@
 from typing import TypeVar
-import PostgresqlBuilder
-import httpgetbuilder as HttpGetBuilder
+import PostgreSQLBuilder
+import HTTPGetBuilder
 
-T = TypeVar('T', PostgresqlBuilder, HttpGetBuilder)
+T = TypeVar('T', PostgreSQLBuilder, HTTPGetBuilder)
+
 class Service:
     builder: T
     resFunc = None
@@ -18,7 +19,7 @@ class Service:
     def run(self) -> bool:
         result = self.builder.execute()
         if self.resFunc:
-            self.resFunc(result)
+            return self.resFunc(result)
         else:
             if result:
                 return True
@@ -26,14 +27,4 @@ class Service:
                 return False
 
 
-if __name__ == "__main__":
-    builder = PostgresqlBuilder.PostgreSQLBuilder()
-    builder.connect("user", "password", "host", 5432, "database")
-    builder.query("SELECT * FROM table")
-    service = Service(builder)
-    service.run()
 
-    builder = HttpGetBuilder.HTTPGetBuilder(url="http://www.google.com", onlystatus=True)
-    service = Service(builder)
-    print(service.run())
-    print("Service ran")
