@@ -8,3 +8,10 @@ A Watchdog, for Services written in python
 - [X] get req as service
 - [ ] post req as service
 - [ ] Notify
+- [ ] Docs
+
+## build and publish to pypi
+```bash
+python3 setup.py sdist bdist_wheel
+twine upload dist/*
+```

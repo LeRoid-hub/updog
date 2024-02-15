@@ -13,6 +13,9 @@ class Server:
     def getIP(self) -> str:
         return self.ip
 
+    def getPort(self) -> int:
+        return self.port
+
     def setMaster(self, master: bool) -> None:
         self.master = master
         self.rank = 0
@@ -34,3 +37,11 @@ class Server:
             return False
         except Exception as e:
             return False
+
+    def serialize(self) -> dict:
+        return {
+            "ip": self.ip,
+            "port": self.port,
+            "master": self.master,
+            "rank": self.rank
+        }

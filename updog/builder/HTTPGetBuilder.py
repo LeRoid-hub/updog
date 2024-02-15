@@ -32,7 +32,6 @@ class HTTPGetBuilder:
             req.add_data(self.payload)
         return req
 
-        
 
     def execute(self):
         try:
@@ -46,9 +45,16 @@ class HTTPGetBuilder:
     def to_dict(self):
         return {"url": self.url, "headers": self.headers, "payload": self.payload}
 
+    def serialize(self):
+        return {
+            "url": self.url,
+            "headers": self.headers,
+            "payload": self.payload,
+            "onlystatus": self.onlystatus
+        }
+
 if __name__ == "__main__":
 
     builder = HTTPGetBuilder(url="http://www.google.com", onlystatus=True)
     print(builder.to_dict())
     print(builder.execute())
-

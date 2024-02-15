@@ -43,3 +43,13 @@ class PostgreSQLBuilder:
 
     def __str__(self):
         return f"PostgreSQLBuilder: {self.sql}"
+
+    def serialize(self):
+        return {
+            "user": self.user,
+            "password": self.password,
+            "host": self.host,
+            "port": self.port,
+            "database": self.database,
+            "sql": self.sql
+        }

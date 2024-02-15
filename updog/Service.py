@@ -27,3 +27,9 @@ class Service:
 
     def __str__(self) -> str:
         return f"Service: {self.builder.__str__()}"
+
+    def serialize(self) -> dict:
+        return {
+            "builder": self.builder.serialize(),
+            "resFunc": self.resFunc
+        }
