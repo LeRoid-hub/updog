@@ -41,3 +41,5 @@ class PostgreSQLBuilder:
             if conn is not None:
                 conn.close()
 
+    def __str__(self):
+        return f"PostgreSQLBuilder: {self.sql}"

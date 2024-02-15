@@ -1,6 +1,6 @@
 from typing import TypeVar
-import PostgreSQLBuilder
-import HTTPGetBuilder
+from PostgreSQLBuilder import PostgreSQLBuilder
+from HTTPGetBuilder import HTTPGetBuilder
 
 T = TypeVar('T', PostgreSQLBuilder, HTTPGetBuilder)
 
@@ -26,5 +26,5 @@ class Service:
             else:
                 return False
 
-
-
+    def __str__(self) -> str:
+        return f"Service: {self.builder.__str__()}"

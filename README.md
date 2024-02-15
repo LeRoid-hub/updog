@@ -6,4 +6,5 @@ A Watchdog, for Services written in python
 - [X] Build a Postgres framework as service
 - [X] Custom Resolve/Return for services
 - [X] get req as service
-- [ ] put req as service
+- [ ] post req as service
+- [ ] Notify
