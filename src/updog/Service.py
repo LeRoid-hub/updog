@@ -1,6 +1,5 @@
+from .builder import PostgreSQLBuilder, HTTPGetBuilder
 from typing import TypeVar
-from PostgreSQLBuilder import PostgreSQLBuilder
-from HTTPGetBuilder import HTTPGetBuilder
 
 T = TypeVar('T', PostgreSQLBuilder, HTTPGetBuilder)
 

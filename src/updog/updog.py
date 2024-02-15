@@ -1,6 +1,6 @@
-from logger import Logger
+from .logger import Logger
+from .server import Server
 from threading import Timer
-from server import Server
 from flask import Flask
 
 class Updog:
