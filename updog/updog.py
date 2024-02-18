@@ -6,9 +6,27 @@ from urllib.request import urlopen, Request
 import json
 
 class Updog:
+    """
+    Updog class to manage the serverpool and services
+    Provides the ability to detect if a server, database or another Instance is down
+    Is structured as a master-slave system
+    When the master is down, the next slave becomes the master
+    When a slave is down, the master removes it from the serverpool
+    If a service is down, the Admin can be notified via a custom sercive like Discord, Telegram, Email, etc.
+
+    Attributes:
+    - Serverpool (list): The list of servers in the serverpool queue
+    - me (Server): The server the instance is running on
+    - Master (bool): If the instance is the master
+    - Services (list): The list of services to be checked
+    - serviceTimer (Timer): The timer to check the services
+    - slaveTimer (Timer): The timer to check the slaves
+    - log (Logger): The logger object
+    - app (Flask): The Flask app
+    
+    """
     Serverpool: list = []
     me: Server
-    ClusterMaster: str = ""
     Master: bool = True
     Services: list = []
     serviceTimer: Timer
@@ -16,7 +34,20 @@ class Updog:
     log: Logger
     app = Flask(__name__)
 
-    def __init__(self, Serverpool, Master, Services, Logger, port) -> None:
+    def __init__(self, Serverpool, Master, Services, Logger, port):
+        """
+        Constructor for the Updog class
+
+        Parameters:
+        - Serverpool (list): The list of servers in the serverpool queue
+        - Master (bool): If the instance is the master
+        - Services (list): The list of services to be checked
+        - Logger (Logger): The logger object
+        - port (int): The port the Flask app should run on
+
+        Returns:
+        - Updog: The Updog object
+        """
         self.Serverpool = Serverpool
         self.Master = Master
         self.Services = Services
@@ -31,6 +62,11 @@ class Updog:
         self.app.run(port=port)
 
     def updog(self):
+        """
+        The updog route for the Flask app
+        Used to add servers to the serverpool or to check if the server is up
+        """
+
         if request.method == 'POST':
             if request.json:
                data = request.json
@@ -49,6 +85,10 @@ class Updog:
         return "Updog"
 
     def get_Serverpool(self) -> jsonify:
+        """
+        The getServerpool route for the Flask app
+        Used to get the serverpool
+        """
         sp = []
         if self.me
             sp.append(self.me)
@@ -58,10 +98,17 @@ class Updog:
         return jsonify(Serverpool=[e.serialize() for e in self.Serverpool])
 
     def get_Services(self) -> jsonify:
+        """
+        The getServices route for the Flask app
+        Used to get the services
+        """
         return jsonify(Services=[e.serialize() for e in self.Services])
 
 
     def anounceSlave(self) -> None:
+        """
+        Anounces a new slave to the master
+        """
         self.getservers()
         server = self.Serverpool[0]
 
@@ -89,6 +136,9 @@ class Updog:
 
 
     def getservers(self):
+        """
+        Gets the serverpool from the master
+        """
         server = self.Serverpool[0]
 
         port = server.getPort()
@@ -115,21 +165,56 @@ class Updog:
 
 #TODO
     def anounceMaster(self) -> None:
+        """
+        Anounces a new master to the slaves
+        """
         pass
 
 #TODO
     def anounceServerpool(self) -> None:
+        """
+        Anounces the serverpool to the slaves
+        """
         pass
 
     def addServer(self, server: Server) -> None:
+        """
+        Adds a server to the serverpool
+
+        Parameters:
+        - server (Server): The server to be added to the serverpool
+
+        Example:
+        ```
+        updog.addServer(Server("http://localhost", "5000"))
+
+        ```
+        """
         self.Serverpool.append(server)
         self.orderServerpool()
         self.anounceServerpool()
 
     def removeServer(self, server) -> None:
+        """
+        Removes a server from the serverpool
+
+        Parameters:
+        - server (Server): The server to be removed from the serverpool
+        """
         self.Serverpool.remove(server)
 
     def addService(self, service) -> None:
+        """
+        Adds a service to the services
+
+        Parameters:
+        - service (Service): The service to be added to the services
+
+        Example:
+        ```
+        updog.addService(Service(PostgeSQLBuilder("http://localhost", "5000")))
+
+        """
         if not callable(service.run()):
             return
 
@@ -137,6 +222,12 @@ class Updog:
             self.Services.append(service)
 
     def removeService(self, service) -> None:
+        """
+        Removes a service from the services
+
+        Parameters:
+        - service (Service): The service to be removed from the services
+        """
         if not callable(service):
             return
 
@@ -147,15 +238,30 @@ class Updog:
         self.Master = master
 
     def getMaster(self) -> bool:
+        """
+        Returns:
+        - bool: If the instance is the master
+        """
         return self.Master
 
     def getServerpool(self) -> list:
+        """
+        Returns:
+        - list: The serverpool
+        """
         return self.Serverpool
 
     def getServices(self) -> list:
+        """
+        Returns:
+        - list: The services
+        """
         return self.Services
 
     def promoteSlave(self) -> None:
+        """
+        Promotes the next slave in line to master
+        """
         if self.me.getRank() == 1:
             self.Master = True
             self.orderServerpool()
@@ -165,23 +271,41 @@ class Updog:
             self.log.error_log("Cant promote slave, not next in line")
 
     def orderServerpool(self) -> None:
+        """
+        Orders the serverpool by rank
+        """
         for i, server in enumerate(self.Serverpool):
            server.setRank(i)
 
     def demoteMaster(self) -> None:
+        """
+        Demotes the instance to slave
+        """
         self.Master = False
 
     def runServices(self) -> None:
+        """
+        Runs the services
+        """
         for service in self.Services:
             self.log.dev_log("Running service: " + service.__str__())
             res = service.run()
             self.log.dev_log("Service: " + service.__str__() + " returned: " + str(res))
 
     def checkSceduler(self, time: int) -> None:
+        """
+        The sceduler for the services
+
+        Parameters:
+        - time (int): The time between each check
+        """
         self.serviceTimer = Timer(time, self.checkSceduler)
         self.runServices()
 
     def checkServerpool(self) -> None:
+        """
+        Checks the serverpool for down servers
+        """
         for server in self.Serverpool:
            self.log.dev_log("Checking server: " + server)
            res = server.checkServer()
@@ -195,14 +319,33 @@ class Updog:
 
 #TODO
     def notify(self, info: str, msg: str) -> None:
+        """
+        Notifies the master of an event
+
+        Parameters:
+        - info (str): The info of the event
+        - msg (str): The message of the event
+        """
         pass
 
     def slaveSceduler(self, time: int) -> None:
+        """
+        The sceduler for the slaves
+
+        Parameters:
+        - time (int): The time between each check in ms
+        """
         self.slaveTimer = Timer(time, self.slaveSceduler)
         self.checkServerpool()
 
     def stopSlaveTimer(self) -> None:
+        """
+        Stops the slaveTimer
+        """
         self.slaveTimer.cancel()
 
     def stopServiceTimer(self) -> None:
+        """
+        Stops the serviceTimer
+        """
         self.serviceTimer.cancel()

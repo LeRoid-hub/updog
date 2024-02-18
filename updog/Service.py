@@ -4,18 +4,50 @@ from typing import TypeVar
 T = TypeVar('T', PostgreSQLBuilder, HTTPGetBuilder)
 
 class Service:
+    """
+    Service class is a wrapper for the builder classes. It is used to execute the builder and return the result.
+
+    Attributes:
+    - builder (T): The builder object to be executed
+    - resFunc (function) - Optinal: The result function to be executed after the builder is executed
+    """
     builder: T
     resFunc = None
 
     def __init__(self, builder: T) -> None:
+        """
+        Constructor for the Service class
+
+        Parameters:
+        - builder (T): The builder object to be executed
+
+        Example:
+        ```
+        service = Service(PostgreSQLBuilder())
+        ```
+        """
         self.builder = builder
 
     def setResFunc(self, resFunc) -> None:
+        """
+        Sets a custom result function for the Service object.
+        With the result function, the result of the builder can be manipulated before returning it.
+
+        Parameters:
+        - resFunc (function): The result function to be executed after the builder is executed
+
+        """
         if not callable(resFunc):
             return
         self.resFunc = resFunc
 
     def run(self) -> bool:
+        """
+        Executes the builder and returns the result.
+
+        Returns:
+        - bool: The result of the builder 
+        """
         result = self.builder.execute()
         if self.resFunc:
             return self.resFunc(result)
@@ -29,6 +61,12 @@ class Service:
         return f"Service: {self.builder.__str__()}"
 
     def serialize(self) -> dict:
+        """ 
+        Serializes the Service object into a dictionary
+
+        Returns:
+        - dict: The serialized Service object
+        """
         return {
             "builder": self.builder.serialize(),
             "resFunc": self.resFunc
