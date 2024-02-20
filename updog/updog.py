@@ -23,7 +23,7 @@ class Updog:
     - slaveTimer (Timer): The timer to check the slaves
     - log (Logger): The logger object
     - app (Flask): The Flask app
-    
+
     """
     Serverpool: list = []
     me: Server
@@ -59,12 +59,17 @@ class Updog:
         self.app.route('/updog', methods=['GET', 'POST'])(self.updog)
         self.app.route('/getServerpool', methods=['GET'])(self.get_Serverpool)
         self.app.route('/getServices', methods=['GET'])(self.get_Services)
+        self.app.route('/newMaster', methods=['GET'])(self.new_master)
         self.app.run(port=port)
 
     def updog(self):
         """
         The updog route for the Flask app
         Used to add servers to the serverpool or to check if the server is up
+
+        Methods:
+            - POST: Adds a server to the serverpool
+            - GET: Checks if the server is up
         """
 
         if request.method == 'POST':
@@ -104,12 +109,27 @@ class Updog:
         """
         return jsonify(Services=[e.serialize() for e in self.Services])
 
+    def new_master(self) -> jsonify:
+        """
+        Gets a new master
+        """
+        if request.json:
+            data = request.json
+            if data["type"] == "master":
+                self.Master = False
+                url  = data["url"] + ":" + data["port"]
+                self.getservers(url)
+                self.anounceSlave()
+            else:
+                self.log.error_log("Invalid request")
+                return "status: 400"
+
 
     def anounceSlave(self) -> None:
         """
         Anounces a new slave to the master
         """
-        self.getservers()
+        self.getservers(None)
         server = self.Serverpool[0]
 
         port = server.getPort()
@@ -135,14 +155,16 @@ class Updog:
         self.log.info_log("Slave anounced")
 
 
-    def getservers(self):
+    def getservers(self, url):
         """
         Gets the serverpool from the master
         """
-        server = self.Serverpool[0]
+        if url == None:
+            server = self.Serverpool[0]
 
-        port = server.getPort()
-        url = server.getIP() + ":" + port + "/getServerpool"
+            port = server.getPort()
+            url = server.getIP() + ":" + port + "/getServerpool"
+
 
         req = Request(url)
 
@@ -168,7 +190,12 @@ class Updog:
         """
         Anounces a new master to the slaves
         """
-        pass
+        for server in self.Serverpool:
+            data = {"type": "master", "url": self.me.getIP(), "port": self.me.getPort()}
+
+            jsondata = json.dumps(data)
+            jsondataasbytes = jsondata.encode('utf-8')
+            server.newMaster(jsondataasbytes)
 
 #TODO
     def anounceServerpool(self) -> None:
@@ -267,7 +294,6 @@ class Updog:
             self.orderServerpool()
             self.anounceMaster()
         else:
-#TODO
             self.log.error_log("Cant promote slave, not next in line")
 
     def orderServerpool(self) -> None:
@@ -276,6 +302,8 @@ class Updog:
         """
         for i, server in enumerate(self.Serverpool):
            server.setRank(i)
+           if server.getIP() == self.me.getIP() and server.getPort() == self.me.getPort():
+               self.me.setRank(i)
 
     def demoteMaster(self) -> None:
         """
@@ -306,18 +334,30 @@ class Updog:
         """
         Checks the serverpool for down servers
         """
+        notReachable = []
+        masterDown = False
+
         for server in self.Serverpool:
            self.log.dev_log("Checking server: " + server)
-           res = server.checkServer()
-           if res == False:
-               self.notify("Server down", server.getIP() + " war master= " + server.getMaster())
-               self.removeServer(server)
-               self.orderServerpool()
-               if server.getMaster() == True:
-                   self.promoteSlave()
-                   server.setMaster(False)
+#TEST
+           if server.getIP() == self.me.getIP() and server.getPort() == self.me.getPort():
+               continue
 
-#TODO
+           res = server.checkServer()
+#TEST
+           if res == False:
+               if server.getMaster() == True:
+                   masterDown = True
+               self.notify("Server down", server.getIP() + " war master= " + masterDown)
+               notReachable.append(server)
+
+        if len(notReachable) > 0:
+            for server in notReachable:
+                if masterDown and self.me.getRank() == 1:
+                    self.promoteSlave()
+                self.removeServer(server)
+                self.orderServerpool()
+
     def notify(self, info: str, msg: str) -> None:
         """
         Notifies the master of an event

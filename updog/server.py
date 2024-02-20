@@ -100,6 +100,20 @@ class Server:
         except Exception as e:
             return False
 
+    def newMaster(self, data: dict)
+        """
+        Gets notified that a new master has been elected
+        """
+        self.master = False
+        try:
+            req = Request('http://' + self.ip + ':' + str(self.port) + '/newMaster', data=data)
+            res = urlopen(req)
+            if res.status == 200:
+                return True
+            return False
+        except Exception as e:
+           return False
+
     def serialize(self) -> dict:
         """
         Serializes the Server object into a dictionary
