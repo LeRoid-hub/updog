@@ -1,5 +1,7 @@
 from .logger import Logger
 from .server import Server
+from .notifier import Email
+from .notify import Notify
 from threading import Timer
 from flask import Flask, request, jsonify
 from urllib.request import urlopen, Request
@@ -33,8 +35,9 @@ class Updog:
     slaveTimer: Timer
     log: Logger
     app = Flask(__name__)
+    notifier: Notify
 
-    def __init__(self, Serverpool, Master, Services, Logger, port):
+    def __init__(self, Serverpool, Master, Services, Logger, Email, port):
         """
         Constructor for the Updog class
 
@@ -52,6 +55,7 @@ class Updog:
         self.Master = Master
         self.Services = Services
         self.log = Logger
+        self.notifier = Email
         if not self.Master:
             self.anounceSlave()
         self.log.dev_log("Updog instance created")
@@ -367,7 +371,8 @@ class Updog:
         - info (str): The info of the event
         - msg (str): The message of the event
         """
-        pass
+        if self.notifier != None:
+            self.notifier.notify(info, msg)
 
     def slaveSceduler(self, time: int) -> None:
         """

@@ -1,16 +1,19 @@
 from .builder import PostgreSQLBuilder, HTTPGetBuilder
 from typing import TypeVar
 
-T = TypeVar('T', PostgreSQLBuilder, HTTPGetBuilder)
 
 class Service:
     """
     Service class is a wrapper for the builder classes. It is used to execute the builder and return the result.
 
     Attributes:
+    - T (TypeVar) -  The allowed types for the builder
     - builder (T): The builder object to be executed
     - resFunc (function) - Optinal: The result function to be executed after the builder is executed
+
     """
+
+    T = TypeVar('T', PostgreSQLBuilder, HTTPGetBuilder)
     builder: T
     resFunc = None
 
@@ -46,7 +49,7 @@ class Service:
         Executes the builder and returns the result.
 
         Returns:
-        - bool: The result of the builder 
+        - bool: The result of the builder
         """
         result = self.builder.execute()
         if self.resFunc:
@@ -61,7 +64,7 @@ class Service:
         return f"Service: {self.builder.__str__()}"
 
     def serialize(self) -> dict:
-        """ 
+        """
         Serializes the Service object into a dictionary
 
         Returns:
@@ -71,3 +74,8 @@ class Service:
             "builder": self.builder.serialize(),
             "resFunc": self.resFunc
         }
+
+    def addType (self, newType):
+        types = self.T.__constraints__
+        types_str = [str(t) for t in types]
+        self.T = TypeVar('T', types_str, newType)
