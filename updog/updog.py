@@ -109,6 +109,7 @@ class Updog:
         """
         return jsonify(Services=[e.serialize() for e in self.Services])
 
+#TEST
     def new_master(self) -> jsonify:
         """
         Gets a new master
@@ -185,7 +186,7 @@ class Updog:
 
 
 
-#TODO
+#TEST
     def anounceMaster(self) -> None:
         """
         Anounces a new master to the slaves
