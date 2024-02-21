@@ -100,7 +100,7 @@ class Server:
         except Exception as e:
             return False
 
-    def newMaster(self, data: dict)
+    def newMaster(self, data: dict):
         """
         Gets notified that a new master has been elected
         """

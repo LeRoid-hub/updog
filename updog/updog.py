@@ -37,7 +37,7 @@ class Updog:
     app = Flask(__name__)
     notifier: Notify
 
-    def __init__(self, Serverpool, Master, Services, Logger, Email, port):
+    def __init__(self, Serverpool, Master, Services, Logger, Notify, me, port):
         """
         Constructor for the Updog class
 
@@ -55,9 +55,13 @@ class Updog:
         self.Master = Master
         self.Services = Services
         self.log = Logger
-        self.notifier = Email
+        self.notifier = Notify
+        self.me = me
         if not self.Master:
             self.anounceSlave()
+            self.log.dev_log(self.getServerpool())
+        else:
+            self.me.setRank(0)
         self.log.dev_log("Updog instance created")
 
         self.app.route('/updog', methods=['GET', 'POST'])(self.updog)
@@ -99,12 +103,12 @@ class Updog:
         Used to get the serverpool
         """
         sp = []
-        if self.me
+        if self.me:
             sp.append(self.me)
 
         sp.extend(self.Serverpool)
 
-        return jsonify(Serverpool=[e.serialize() for e in self.Serverpool])
+        return jsonify(Serverpool=[e.serialize() for e in sp])
 
     def get_Services(self) -> jsonify:
         """
@@ -138,18 +142,24 @@ class Updog:
         server = self.Serverpool[0]
 
         port = server.getPort()
-        url = server.getIP() + ":" + port + "/updog"
+        url = server.getIP() + ":" + str(port) + "/updog"
         req = Request(url)
+        headers = {
+            'Content-type':'application/json',
+            'Accept':'application/json'
+        }
         data = {"type": "server", "url": self.me.getIP(), "port": self.me.getPort()}
 
         req.add_header('Content-Type', 'application/json; charset=utf-8')
         jsondata = json.dumps(data)
         jsondataasbytes = jsondata.encode('utf-8')   # needs to be bytes
 
-        req = Request(url, jsondataasbytes, method='POST')
+        req = Request(url, jsondataasbytes,headers=headers, method='POST')
 
         try:
             response = urlopen(req)
+            print(response.getcode())
+            self.log.dev_log(response)
             if response.getcode() == 200:
                 return
             else:
@@ -168,7 +178,7 @@ class Updog:
             server = self.Serverpool[0]
 
             port = server.getPort()
-            url = server.getIP() + ":" + port + "/getServerpool"
+            url = server.getIP() + ":" + str(port) + "/getServerpool"
 
 
         req = Request(url)
@@ -176,15 +186,23 @@ class Updog:
         try:
             response = urlopen(req)
             if response.getcode() == 200:
-                if response.json()["type"] == "serverpool":
-#TODO
-#TEST
-                    self.Serverpool = response.json()["Serverpool"]
+                string = response.read().decode('utf-8')
+                jsondata = json.loads(string)
+                if jsondata.get("Serverpool"):
+                    self.Serverpool = []
+                    for server in jsondata.get("Serverpool"):
+                        if not (server.get("ip") ==  self.me.getIP() and server.get("port") == self.me.getPort()):
+                            s = Server(server.get("ip"), server.get("port"))
+                            s.setRank(server.get("rank"))
+                            s.setMaster(server.get("master"))
+                            self.Serverpool.append(s)
+
                 else:
                     self.log.error_log("Invalid response")
             else:
                 self.log.error_log("Invalid response")
-        except:
+        except Exception as e:
+            self.log.error_log(e)
             self.log.error_log("Server not found")
             return
 

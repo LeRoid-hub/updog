@@ -1,3 +1,3 @@
 from .discord import Discord
 from .telegram import Telegram
-from .email-mod import Email
+from .email_mod import Email

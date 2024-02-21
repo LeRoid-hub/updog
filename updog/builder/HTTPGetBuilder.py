@@ -137,4 +137,3 @@ class HTTPGetBuilder:
             "payload": self.payload,
             "onlystatus": self.onlystatus
         }
-

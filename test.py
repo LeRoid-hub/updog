@@ -31,6 +31,7 @@ class type3:
     def run(self) -> None:
         print("Doing type3 things")
 
+
 from typing import TypeVar
 class wrapper:
     T = TypeVar('T', type1, type2)
