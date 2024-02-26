@@ -2,13 +2,20 @@
 A Watchdog, for Services written in python
 
 ## Roadmap
-- [ ] comunicate between instances (master/ slave)
+To V1
+- [X] comunicate between instances (master/ slave)
 - [X] Build a Postgres framework as service
 - [X] Custom Resolve/Return for services
 - [X] get req as service
-- [ ] post req as service
-- [ ] Notify
+- [X] Notify Email
+- [ ] Tests
 - [ ] Docs
+
+Down the Road
+- [ ] Notify Discord
+- [ ] Notify Telegram
+- [ ] post req as service
+
 
 ## test
 ```bash
