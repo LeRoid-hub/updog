@@ -32,7 +32,9 @@ class Updog:
     Master: bool = True
     Services: list = []
     serviceTimer: Timer
+    serviceTime: int = 60
     slaveTimer: Timer
+    slaveTime: int = 20
     log: Logger
     app = Flask(__name__)
     notifier: Notify
@@ -59,9 +61,11 @@ class Updog:
         self.me = me
         if not self.Master:
             self.anounceSlave()
+            self.slaveSceduler(self.slaveTime)
             self.log.dev_log(self.getServerpool())
         else:
             self.me.setRank(0)
+            self.checkSceduler(self.serviceTime)
         self.log.dev_log("Updog instance created")
 
         self.app.route('/updog', methods=['GET', 'POST'])(self.updog)
