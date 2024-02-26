@@ -10,6 +10,15 @@ A Watchdog, for Services written in python
 - [ ] Notify
 - [ ] Docs
 
+## test
+```bash
+python3 -m unittest
+```
+For additional information, use the -v flag
+```bash
+python3 -m unittest -v
+```
+
 ## build and publish to pypi
 ```bash
 python3 setup.py sdist bdist_wheel
