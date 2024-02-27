@@ -24,7 +24,6 @@ class PostgreSQLBuilder:
         """
         Constructor for the PostgreSQLBuilder class
         """
-        self._query = None
 
     def connect(self, user: str, password: str, host: str, port: int, database: str):
         """
@@ -66,6 +65,9 @@ class PostgreSQLBuilder:
         - list: The result of the SQL query
         - Exception: The exception if the query fails
         """
+        if hasattr(self, "sql") is False or self.sql is None or self.sql == "":
+            return "No query to execute"
+
         conn = None
         try:
             conn = psycopg2.connect(user=self.user,
@@ -80,7 +82,6 @@ class PostgreSQLBuilder:
             cur.close()
             return fetch
         except (Exception, psycopg2.DatabaseError) as error:
-            print(error)
             return error
         finally:
             if conn is not None:
@@ -113,6 +114,24 @@ class PostgreSQLBuilder:
             "sql": "SELECT * FROM test"
         }
         """
+        if hasattr(self, "user") is False and hasattr(self,"sql") is False:
+            return Exception("No user or sql query")
+
+        if hasattr(self, "sql") is False or self.sql is None or self.sql == "":
+            return {
+                "user": self.user,
+                "password": self.password,
+                "host": self.host,
+                "port": self.port,
+                "database": self.database,
+                "sql": ""
+            }
+
+        if hasattr(self, "user") is False or self.user is None or self.user == "":
+            return {
+                "sql": self.sql
+            }
+
         return {
             "user": self.user,
             "password": self.password,
