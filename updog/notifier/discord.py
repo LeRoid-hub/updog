@@ -1,3 +1,3 @@
 class Discord:
-    def __init__(self):
-       print("NOT YET IMPLEMENTED")
+    def __init__():
+        raise AssertionError("NOT YET IMPLEMENTED")
