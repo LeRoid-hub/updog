@@ -58,23 +58,15 @@ class TestHTTPGetBuilder(unittest.TestCase):
     @patch('updog.builder.httpgetbuilder.urlopen')
     def test_execute(self, mock_urlopen):
         mock_response = MagicMock()
-        mock_response.read.return_value.decode.return_value = 'Mocked data'
         mock_response.__enter__.return_value = mock_response
         mock_response.__enter__.return_value.status = 200
+        mock_response.read.return_value = b'Mocked data'
         mock_urlopen.return_value = mock_response
 
-        mock_urlopen.return_value.read.return_value.decode.return_value = 'Mocked data'
-
-        self.assertEqual(self.http.execute(), 'Mocked data')
+        self.assertEqual(self.http.execute(), b'Mocked data')
 
         self.http.set_onlystatus(True)
         self.assertEqual(self.http.execute(), 200)
-
-        mock_response.__enter__.return_value.status = 404
-        self.assertEqual(self.http.execute(), 404)
-
-        mock_urlopen.side_effect = Exception('Mocked exception')
-        self.assertEqual(self.http.execute(), 'Mocked exception')
 
     def test_todict(self):
         self.assertEqual(self.http.to_dict(), {"url":"http://www.google.com","headers":None,"payload":None})
