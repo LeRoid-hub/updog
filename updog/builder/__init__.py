@@ -1,2 +1,2 @@
-from .HTTPGetBuilder import HTTPGetBuilder
+from .httpgetbuilder import HTTPGetBuilder
 from .PostgreSQLBuilder import PostgreSQLBuilder

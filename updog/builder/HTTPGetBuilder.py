@@ -51,7 +51,7 @@ class HTTPGetBuilder:
         """
         self.url = url
 
-    def set_headers(self, headers: str) -> None:
+    def set_headers(self, headers: dict) -> None:
         """
         Sets the headers of the request
 
@@ -87,9 +87,10 @@ class HTTPGetBuilder:
         """
         req = Request(self.url)
         if self.headers:
-            req.add_header(self.headers)
+            for key, value in self.headers.items():
+                req.add_header(key, value)
         if self.payload:
-            req.add_data(self.payload)
+            req.data = self.payload.encode("utf-8")
         return req
 
 

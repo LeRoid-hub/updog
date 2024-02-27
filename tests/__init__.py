@@ -3,10 +3,12 @@ import unittest
 
 # Import your test modules
 from .server_test import TestServer
+from .httpgetbuilder_test import TestHTTPGetBuilder
 
 def suite():
     test_suite = unittest.TestSuite()
     test_suite.addTest(unittest.makeSuite(TestServer))
+    test_suite.addTest(unittest.makeSuite(TestHTTPGetBuilder))
     # Add more test modules as needed
     return test_suite
 
