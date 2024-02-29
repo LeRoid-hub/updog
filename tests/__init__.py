@@ -10,6 +10,7 @@ from .telegram_test import TestTelegram
 from .email_test import TestEmail
 from .logger_test import TestLogger
 from .notify_test import TestNotify
+from .updog_test import TestUpdog
 
 def suite():
     test_suite = unittest.TestSuite()
@@ -21,6 +22,7 @@ def suite():
     test_suite.addTest(unittest.makeSuite(TestEmail))
     test_suite.addTest(unittest.makeSuite(TestLogger))
     test_suite.addTest(unittest.makeSuite(TestNotify))
+    test_suite.addTest(unittest.makeSuite(TestUpdog))
     # Add more test modules as needed
     return test_suite
 
