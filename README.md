@@ -8,6 +8,7 @@ To V1
 - [X] Custom Resolve/Return for services
 - [X] get req as service
 - [X] Notify Email
+- [X] Examples
 - [ ] Tests
 - [ ] Docs
 
