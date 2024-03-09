@@ -32,3 +32,16 @@ python3 -m unittest -v
 python3 setup.py sdist bdist_wheel
 twine upload dist/*
 ```
+
+## Contribute
+
+Contributions are welcome.
+For Things to do look in the Issues and at Roadmap.
+To contribute fork this repository and create a pull request.
+
+### Setup work enviroment
+
+```bash
+pip install -r requirements.txt
+```
+
