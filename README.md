@@ -16,6 +16,7 @@ Down the Road
 - [ ] Notify Discord
 - [ ] Notify Telegram
 - [ ] post req as service
+- [ ] encript the messaged between the clients
 
 
 ## test
