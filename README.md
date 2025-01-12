@@ -9,7 +9,7 @@ To V1
 - [ ] Custom Resolve/Return for services
 - [ ] post req as service
 - [ ] get req as service
-- [X] Notify Email
+- [X] Notify Email  
 - [X] Notify Ntfy 
 - [ ] Encrypt Communication
 - [ ] Examples
